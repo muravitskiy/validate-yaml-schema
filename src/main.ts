@@ -14,7 +14,6 @@ async function run() {
     const yamlVersionInput = core.getInput('yamlVersion');
 
     // Settings checking
-
     let inlineYamlSchemas;
     if (yamlSchemasJson)
     {
