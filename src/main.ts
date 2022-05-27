@@ -43,7 +43,6 @@ async function run() {
     core.setOutput('invalidFiles', invalidFiles);
 
     if (invalidResults.length > 0) {
-        core.warning('Invalid Files: ' + invalidFiles);
         invalidResults.forEach(function(el) {
           if (el.results?.length > 0) {
             el.results.forEach(function(diag) {
@@ -57,6 +56,8 @@ async function run() {
               }
               core.error(diag.message, options);
             })
+          } else {
+            core.error('Invalid File', {file: el.filePath});
           }
         })
         core.setFailed('Schema validation failed on one or more YAML files.');
