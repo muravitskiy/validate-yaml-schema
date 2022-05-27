@@ -55,7 +55,7 @@ async function run() {
                 options.startColumn = start?.character || undefined
                 options.endColumn = end?.character || undefined
               }
-              core.warning(diag.message, options);
+              core.error(diag.message, options);
             })
           }
         })
