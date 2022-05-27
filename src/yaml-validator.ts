@@ -3,10 +3,12 @@ import { glob } from 'glob'
 import { getYaml } from './file-reader';
 import { SchemaValidator } from './schema-validator';
 import { prettyLog } from './logger';
+import { Diagnostic } from 'yaml-language-server';
 
 export interface ValidationResult {
     filePath: string;
     valid: boolean;
+    results: Diagnostic[]
 }
 
 export const validateYaml = async ( workspaceRoot: string, schemas: any, yamlVersion: string): Promise<ValidationResult[]> => {
@@ -49,15 +51,15 @@ export const validateYaml = async ( workspaceRoot: string, schemas: any, yamlVer
                     const yamlDocument = await getYaml(path.join(workspaceRoot,filePath));
                     const result = await schemaValidator.isValid(yamlDocument);
                     prettyLog(filePath);
-                    return { filePath, valid: result };
+                    return <ValidationResult>{ filePath, valid: !!!result.length, results: result };
                 } catch (e) {
                     prettyLog(filePath, e);
-                    return { filePath, valid: false };
+                    return <ValidationResult>{ filePath, valid: false };
                 }
             })
         );
     } catch (err) {
         prettyLog(workspaceRoot, err);
-        return [{ filePath: workspaceRoot, valid: false }];
+        return [<ValidationResult>{ filePath: workspaceRoot, valid: false }];
     }
 };

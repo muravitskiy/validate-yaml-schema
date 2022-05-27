@@ -1,6 +1,6 @@
 import * as URL from 'url';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { LanguageSettings } from 'yaml-language-server'
+import { Diagnostic, LanguageSettings } from 'yaml-language-server'
 import { YAMLValidation } from 'yaml-language-server/lib/umd/languageservice/services/yamlValidation'
 import { YamlVersion } from 'yaml-language-server/lib/umd/languageservice/parser/yamlParser07'
 import { YAMLSchemaService } from 'yaml-language-server/lib/umd/languageservice/services/yamlSchemaService'
@@ -84,17 +84,16 @@ export class SchemaValidator {
   }
 
 
-  public async isValid(yamlDocument : TextDocument) : Promise<boolean> {
+  public async isValid(yamlDocument : TextDocument) : Promise<Diagnostic[]> {
 
     const results = await this.validator.doValidation(yamlDocument, false);
 
     if (results.length) {
       console.log(yamlDocument.uri);
       console.log(JSON.stringify(results));
-      return false;
     }
       
-    return true;
+    return results;
   }
 
 };

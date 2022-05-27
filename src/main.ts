@@ -34,17 +34,32 @@ async function run() {
 
     const validationResults = await validateYaml(workspaceRoot, schemas, yamlVersion);
 
-    const validResults = validationResults.filter(res => res.valid).map(res => res.filePath);
-    const invalidResults = validationResults.filter(res => !res.valid).map(res => res.filePath);
+    const validResults = validationResults.filter(res => res.valid);
+    const invalidResults = validationResults.filter(res => !res.valid);
 
-    const validFiles = validResults.length > 0 ? validResults.join(',') : '';
-    const invalidFiles = invalidResults.length > 0 ? invalidResults.join(',') : '';
+    const validFiles = validResults.length > 0 ? validResults.map(res => res.filePath).join(',') : '';
+    const invalidFiles = invalidResults.length > 0 ? invalidResults.map(res => res.filePath).join(',') : '';
 
     core.setOutput('validFiles', validFiles);
     core.setOutput('invalidFiles', invalidFiles);
 
     if (invalidResults.length > 0) {
         core.warning('Invalid Files: ' + invalidFiles);
+        invalidResults.forEach(function(el) {
+          if (el.results?.length > 0) {
+            el.results.forEach(function(diag) {
+              const { start, end } = diag.range;
+              const options = <core.AnnotationProperties>{file: el.filePath};
+              options.startLine = start?.line || undefined;
+              options.endLine = end?.line || undefined;
+              if (start?.line == end?.line && start?.line !== undefined) {
+                options.startColumn = start?.character || undefined
+                options.endColumn = end?.character || undefined
+              }
+              core.warning(diag.message, options);
+            })
+          }
+        })
         core.setFailed('Schema validation failed on one or more YAML files.');
     } else {
         core.info(`✅ YAML Schema validation completed successfully`);
